@@ -79,7 +79,7 @@ posted through the API is lost on shutdown.
 | URL | Purpose |
 |---|---|
 | http://localhost:8080/swagger-ui.html | Swagger UI (try the APIs in the browser) |
-| http://localhost:8080/v3/api-docs | OpenAPI 3 document (JSON) |
+| http://localhost:8080/v3/api-docs | OpenAPI 3 document (JSON), also checked in at [docs/openapi.json](docs/openapi.json) |
 | http://localhost:8080/actuator/health | Health check |
 | http://localhost:8080/actuator/caches | Registered caches |
 

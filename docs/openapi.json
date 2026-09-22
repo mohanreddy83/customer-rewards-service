@@ -1,0 +1,472 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Customer Rewards Service API",
+        "description": "Calculates retail reward points per customer, per month and in total. 2 points per dollar over $100 and 1 point per dollar between $50 and $100 of each transaction.",
+        "version": "v1"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080",
+            "description": "Generated server url"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Rewards",
+            "description": "Reward points per customer, per month and in total"
+        },
+        {
+            "name": "Transactions",
+            "description": "Record and list purchases"
+        },
+        {
+            "name": "Customers",
+            "description": "Customers of the rewards program"
+        }
+    ],
+    "paths": {
+        "/api/v1/transactions": {
+            "get": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "List purchases of a customer",
+                "operationId": "getTransactions",
+                "parameters": [
+                    {
+                        "name": "customerId",
+                        "in": "query",
+                        "description": "Customer identifier",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Purchases listed",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/TransactionResponse"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Customer not found",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Record a purchase",
+                "description": "Stores a purchase and returns it with the reward points it earned. Cached reward calculations are refreshed.",
+                "operationId": "createTransaction",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TransactionRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Purchase recorded",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TransactionResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Validation failed",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Customer not found",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rewards": {
+            "get": {
+                "tags": [
+                    "Rewards"
+                ],
+                "summary": "Rewards of all customers",
+                "description": "Returns monthly and total reward points for every customer. Without from/to the three calendar months ending with the month of the latest transaction are reported.",
+                "operationId": "getAllRewards",
+                "parameters": [
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "description": "First day of the period, ISO date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "example": "2026-06-01"
+                    },
+                    {
+                        "name": "to",
+                        "in": "query",
+                        "description": "Last day of the period, ISO date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "example": "2026-08-31"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rewards calculated",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CustomerRewardsResponse"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid period",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rewards/{customerId}": {
+            "get": {
+                "tags": [
+                    "Rewards"
+                ],
+                "summary": "Rewards of one customer",
+                "description": "Returns monthly and total reward points for a single customer.",
+                "operationId": "getCustomerRewards",
+                "parameters": [
+                    {
+                        "name": "customerId",
+                        "in": "path",
+                        "description": "Customer identifier",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 1
+                    },
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "description": "First day of the period, ISO date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "example": "2026-06-01"
+                    },
+                    {
+                        "name": "to",
+                        "in": "query",
+                        "description": "Last day of the period, ISO date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "example": "2026-08-31"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rewards calculated",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomerRewardsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid period",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Customer not found",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/customers": {
+            "get": {
+                "tags": [
+                    "Customers"
+                ],
+                "summary": "List all customers",
+                "operationId": "getCustomers",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CustomerResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "TransactionRequest": {
+                "type": "object",
+                "description": "A purchase to record",
+                "properties": {
+                    "customerId": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "amount": {
+                        "type": "number",
+                        "description": "Amount spent in dollars",
+                        "example": 120.0,
+                        "minimum": 0.01
+                    },
+                    "transactionDate": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "Date of the purchase (ISO-8601)",
+                        "example": "2026-08-15"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Electronics store",
+                        "maxLength": 200,
+                        "minLength": 0
+                    }
+                },
+                "required": [
+                    "amount",
+                    "customerId",
+                    "transactionDate"
+                ]
+            },
+            "ErrorResponse": {
+                "type": "object",
+                "description": "Error details",
+                "properties": {
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "status": {
+                        "type": "integer",
+                        "format": "int32",
+                        "example": 404
+                    },
+                    "error": {
+                        "type": "string",
+                        "example": "Not Found"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Customer 99 not found"
+                    },
+                    "path": {
+                        "type": "string",
+                        "example": "/api/v1/rewards/99"
+                    },
+                    "details": {
+                        "type": "array",
+                        "description": "Field level validation problems, if any",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "TransactionResponse": {
+                "type": "object",
+                "description": "A recorded purchase and the reward points it earned",
+                "properties": {
+                    "transactionId": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 42
+                    },
+                    "customerId": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "amount": {
+                        "type": "number",
+                        "example": 120.0
+                    },
+                    "transactionDate": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-08-15"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Electronics store"
+                    },
+                    "rewardPoints": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Reward points earned by this purchase",
+                        "example": 90
+                    }
+                }
+            },
+            "CustomerRewardsResponse": {
+                "type": "object",
+                "description": "Reward points of a customer per month and in total",
+                "properties": {
+                    "customerId": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "customerName": {
+                        "type": "string",
+                        "example": "Alice Johnson"
+                    },
+                    "periodStart": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "First day of the reported period (inclusive)",
+                        "example": "2026-06-01"
+                    },
+                    "periodEnd": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "Last day of the reported period (inclusive)",
+                        "example": "2026-08-31"
+                    },
+                    "monthlyRewards": {
+                        "type": "array",
+                        "description": "One entry per calendar month of the period, including months without purchases",
+                        "items": {
+                            "$ref": "#/components/schemas/MonthlyRewards"
+                        }
+                    },
+                    "totalPoints": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Sum of the monthly points",
+                        "example": 525
+                    }
+                }
+            },
+            "MonthlyRewards": {
+                "type": "object",
+                "description": "Reward points earned in one calendar month",
+                "properties": {
+                    "month": {
+                        "type": "string",
+                        "description": "Calendar month in yyyy-MM format",
+                        "example": "2026-06"
+                    },
+                    "transactionCount": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Number of purchases made in the month",
+                        "example": 2
+                    },
+                    "points": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Reward points earned in the month",
+                        "example": 115
+                    }
+                }
+            },
+            "CustomerResponse": {
+                "type": "object",
+                "description": "A customer enrolled in the rewards program",
+                "properties": {
+                    "customerId": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Alice Johnson"
+                    }
+                }
+            }
+        }
+    }
+}

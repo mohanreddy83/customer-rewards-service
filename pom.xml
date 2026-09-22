@@ -8,7 +8,7 @@
 		<version>4.1.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.spectrum</groupId>
+	<groupId>com.customer</groupId>
 	<artifactId>customer-rewards-service</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<name>customer-rewards-service</name>
